@@ -1,0 +1,40 @@
+version: '3'
+
+networks:
+  apache-php8.1:
+
+services:
+  apache-php:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: 'php:8.1-apache'
+    container_name: php-apache_container
+    restart: always
+    ports:
+      - '7000:80'
+    volumes:
+      - ./src:/var/www/html
+      - ./conf/default.conf:/etc/apache2/sites-enabled/000-default.conf:ro
+    networks:
+      - apache-php8.1
+
+  composer:
+    image: composer:latest
+    container_name: composer
+    volumes: 
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    depends_on: 
+      - apache-php
+    networks:
+     - apache-php8.1
+    entrypoint: ['composer']
+
+  npm: 
+    image: node:latest
+    container_name: npm
+    volumes: 
+      - ./src:/var/www/html
+    working_dir: /var/www/html
+    entrypoint: ['npm']
